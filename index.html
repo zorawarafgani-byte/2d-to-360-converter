@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 2D Image to 3D Model Converter | Free Glassmorphism Tool</title>
+<meta name="description" content="Convert your 2D images into 360-degree interactive 3D GLB models instantly using AI. Fast, free, and easy to use.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<style>
+body{background:linear-gradient(135deg,#0d9488 0%,#115e59 40%,#042f2e 100%) fixed;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;min-height:100vh}
+.glass-card{background:rgba(255,255,255,.15);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 32px 0 rgba(0,0,0,.3)}
+.glass-input{background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:#fff}
+.glass-input::placeholder{color:rgba(255,255,255,.7)}
+.glass-button{background:rgba(255,255,255,.25);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.4);transition:all .3s ease}
+.glass-button:hover{background:rgba(255,255,255,.4);transform:translateY(-2px)}
+.glass-button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.nav-btn.active{background:rgba(255,255,255,.35);border-bottom:2px solid #5eead4}
+:focus-visible{outline:2px solid #5eead4;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body class="text-white flex flex-col min-h-screen">
+
+<header class="p-4">
+ <div class="max-w-5xl mx-auto glass-card rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+  <div class="flex items-center gap-3">
+   <div class="w-10 h-10 rounded-xl bg-teal-400/30 flex items-center justify-center border border-white/40"><span class="text-2xl">🧊</span></div>
+   <h1 class="text-2xl font-bold tracking-wide text-white">3D<span class="text-teal-300">Gen</span> AI</h1>
+  </div>
+  <nav class="flex gap-2 bg-black/20 p-1.5 rounded-xl border border-white/10">
+   <button onclick="switchTab('convert')" id="tab-convert" class="nav-btn active px-5 py-2 rounded-lg font-medium transition text-sm sm:text-base">Convert</button>
+   <button onclick="switchTab('about')" id="tab-about" class="nav-btn px-5 py-2 rounded-lg font-medium transition text-sm sm:text-base">About</button>
+   <button onclick="switchTab('contact')" id="tab-contact" class="nav-btn px-5 py-2 rounded-lg font-medium transition text-sm sm:text-base">Contact Us</button>
+  </nav>
+ </div>
+</header>
+
+<main class="flex-grow flex items-center justify-center p-4">
+<div class="max-w-4xl w-full">
+
+ <!-- TAB 1: CONVERT -->
+ <section id="content-convert" class="glass-card rounded-3xl p-6 sm:p-10 text-center">
+  <h2 class="text-3xl font-extrabold mb-2 text-teal-100">2D Image to 360° 3D Model</h2>
+  <p class="text-teal-100/80 mb-8 max-w-md mx-auto text-sm">Upload any flat image and let AI transform it into a fully interactive 3D model in seconds.</p>
+
+  <div class="max-w-md mx-auto mb-6 text-left">
+   <label for="apiKeyInput" class="block text-xs font-semibold mb-2 text-teal-100/90">Tripo3D API Key:</label>
+   <input type="password" id="apiKeyInput" autocomplete="off" placeholder="Paste your Tripo3D API Key here..." class="w-full px-4 py-2.5 rounded-xl glass-input text-sm focus:outline-none focus:ring-2 focus:ring-teal-300">
+   <p class="text-[11px] text-teal-200/60 mt-1">Get a key at <a href="https://developers.tripo3d.ai" target="_blank" rel="noopener" class="underline text-teal-200">developers.tripo3d.ai</a>. It stays in your browser and is only sent to Tripo.</p>
+  </div>
+
+  <div class="max-w-md mx-auto mb-8">
+   <label for="imageInput" class="cursor-pointer block p-8 rounded-2xl glass-input border-2 border-dashed border-white/40 hover:border-teal-300 transition text-center group">
+    <img id="preview" alt="Selected image preview" class="hidden mx-auto mb-3 max-h-40 rounded-xl">
+    <div id="upIcon" class="text-4xl mb-3 group-hover:scale-110 transition duration-300">📷</div>
+    <span class="block text-sm font-semibold mb-1 text-white">Click to Upload Image</span>
+    <span class="block text-xs text-teal-100/70">PNG, JPG, or WEBP (Max 5MB)</span>
+    <input type="file" id="imageInput" accept="image/png,image/jpeg,image/webp" class="hidden" onchange="handleFileSelect(event)">
+   </label>
+   <div id="fileName" class="text-xs text-teal-200 mt-2 hidden"></div>
+  </div>
+
+  <button id="genBtn" onclick="generate3DModel()" class="glass-button px-8 py-3.5 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 mx-auto">
+   <span>✨ Generate 3D Model</span>
+  </button>
+
+  <p id="errorMsg" role="alert" class="hidden mt-6 text-sm text-red-100 bg-red-500/25 border border-red-300/40 rounded-xl px-4 py-3 max-w-md mx-auto"></p>
+
+  <div id="loadingState" class="hidden mt-8" aria-live="polite">
+   <div class="inline-block w-10 h-10 border-4 border-white/30 border-t-teal-300 rounded-full animate-spin mb-3"></div>
+   <p id="loadingText" class="text-sm font-medium text-teal-100">AI is crafting your 3D model... Please wait (30-60s)</p>
+  </div>
+
+  <div id="viewerContainer" class="hidden mt-8">
+   <h3 class="text-lg font-bold mb-3 text-teal-100">360° Interactive Preview</h3>
+   <div class="glass-card rounded-2xl p-2 max-w-lg mx-auto h-[350px] relative overflow-hidden">
+    <model-viewer id="modelViewer" alt="A 3D model" auto-rotate camera-controls shadow-intensity="1" class="w-full h-full rounded-xl"></model-viewer>
+   </div>
+   <a id="downloadBtn" href="#" target="_blank" rel="noopener" download="model.glb" class="inline-block mt-4 glass-button px-6 py-2.5 rounded-xl text-sm font-semibold">⬇️ Download .GLB File</a>
+  </div>
+ </section>
+
+ <!-- TAB 2: ABOUT -->
+ <section id="content-about" class="glass-card rounded-3xl p-6 sm:p-10 hidden">
+  <h2 class="text-3xl font-extrabold mb-4 text-teal-100">About This Tool</h2>
+  <div class="space-y-4 text-teal-100/90 text-sm leading-relaxed">
+   <p>Welcome to <strong>3DGen AI</strong>, a lightweight utility tool designed to convert standard 2D flat photographs into interactive, full 360-degree 3D digital objects.</p>
+   <p>Powered by advanced AI neural networks and WebGL rendering technology, our platform enables creators, designers, and developers to generate 3D assets fast without specialized modeling software or experience.</p>
+   <h3 class="text-lg font-bold text-teal-100 pt-2">How it works</h3>
+   <ol class="list-decimal pl-5 space-y-1">
+    <li>Paste your Tripo3D API key.</li>
+    <li>Upload a clear image of a single object (PNG, JPG or WEBP, up to 5MB).</li>
+    <li>Click <strong>Generate 3D Model</strong> and wait 30 to 60 seconds.</li>
+    <li>Rotate the model in the viewer and download the <code>.glb</code> file.</li>
+   </ol>
+   <h3 class="text-lg font-bold text-teal-100 pt-2">Tips for better results</h3>
+   <ul class="list-disc pl-5 space-y-1">
+    <li>Use one object on a plain background.</li>
+    <li>Choose a well-lit, sharp image with the whole object visible.</li>
+    <li>Avoid heavy shadows, glass and very thin parts.</li>
+   </ul>
+   <p>GLB files open in Blender, Unity, Unreal Engine, AR viewers and most web 3D tools.</p>
+  </div>
+ </section>
+
+ <!-- TAB 3: CONTACT -->
+ <section id="content-contact" class="glass-card rounded-3xl p-6 sm:p-10 hidden">
+  <h2 class="text-3xl font-extrabold mb-2 text-teal-100">Contact Us</h2>
+  <p class="text-teal-100/80 mb-6 text-sm">Questions, feedback or business enquiries? Send us a message.</p>
+  <form onsubmit="sendContact(event)" class="max-w-md space-y-4 text-left">
+   <div><label for="cName" class="block text-xs font-semibold mb-1 text-teal-100/90">Your name</label>
+    <input id="cName" required class="w-full px-4 py-2.5 rounded-xl glass-input text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"></div>
+   <div><label for="cEmail" class="block text-xs font-semibold mb-1 text-teal-100/90">Your email</label>
+    <input id="cEmail" type="email" required class="w-full px-4 py-2.5 rounded-xl glass-input text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"></div>
+   <div><label for="cMsg" class="block text-xs font-semibold mb-1 text-teal-100/90">Message</label>
+    <textarea id="cMsg" rows="5" required class="w-full px-4 py-2.5 rounded-xl glass-input text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"></textarea></div>
+   <button class="glass-button px-8 py-3 rounded-xl font-bold">Send message</button>
+  </form>
+ </section>
+
+</div>
+</main>
+
+<footer class="p-4 text-center text-xs text-teal-100/60">© <span id="yr"></span> 3DGen AI. Models are generated by Tripo3D.</footer>
+
+<script>
+// ===== Settings: change here if the Tripo API changes =====
+const API_BASE='https://api.tripo3d.ai/v2/openapi';
+const CONTACT_EMAIL='your@email.com'; // replace with your real email
+const MAX_BYTES=5*1024*1024, POLL_MS=3000, TIMEOUT_MS=5*60*1000;
+// ==========================================================
+const $=id=>document.getElementById(id);
+let selectedFile=null;
+$('yr').textContent=new Date().getFullYear();
+$('apiKeyInput').value=sessionStorage.getItem('tripoKey')||'';
+
+function switchTab(t){
+ ['convert','about','contact'].forEach(n=>{
+  $('content-'+n).classList.toggle('hidden',n!==t);
+  $('tab-'+n).classList.toggle('active',n===t);
+ });
+}
+function showError(m){const e=$('errorMsg');e.textContent=m;e.classList.toggle('hidden',!m)}
+
+function handleFileSelect(ev){
+ showError('');const f=ev.target.files[0];if(!f)return;
+ if(!/^image\/(png|jpe?g|webp)$/.test(f.type)){showError('Please choose a PNG, JPG or WEBP image.');ev.target.value='';return}
+ if(f.size>MAX_BYTES){showError('That image is over 5MB. Choose a smaller one.');ev.target.value='';return}
+ selectedFile=f;
+ $('fileName').textContent='Selected: '+f.name;$('fileName').classList.remove('hidden');
+ $('preview').src=URL.createObjectURL(f);$('preview').classList.remove('hidden');$('upIcon').classList.add('hidden');
+}
+
+async function api(path,opts,key){
+ const r=await fetch(API_BASE+path,{...opts,headers:{Authorization:'Bearer '+key,...(opts&&opts.headers)}});
+ let j={};try{j=await r.json()}catch(e){}
+ if(!r.ok||(j.code!==undefined&&j.code!==0)){
+  const m=j.message||j.suggestion||('Request failed ('+r.status+')');
+  throw new Error(r.status===401||r.status===403?'Invalid API key or no access. Check your key.':m);
+ }
+ return j.data;
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+async function generate3DModel(){
+ showError('');
+ const key=$('apiKeyInput').value.trim();
+ if(!key){showError('Paste your Tripo3D API key first.');return}
+ if(!selectedFile){showError('Upload an image first.');return}
+ sessionStorage.setItem('tripoKey',key);
+ $('genBtn').disabled=true;$('viewerContainer').classList.add('hidden');
+ $('loadingState').classList.remove('hidden');$('loadingText').textContent='Uploading image...';
+ try{
+  const fd=new FormData();fd.append('file',selectedFile);
+  const up=await api('/upload',{method:'POST',body:fd},key);
+  const type=selectedFile.type==='image/png'?'png':selectedFile.type==='image/webp'?'webp':'jpg';
+  $('loadingText').textContent='AI is crafting your 3D model... Please wait (30-60s)';
+  const task=await api('/task',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({type:'image_to_model',file:{type,file_token:up.image_token}})},key);
+  const start=Date.now();
+  while(true){
+   if(Date.now()-start>TIMEOUT_MS)throw new Error('This is taking too long. Please try again.');
+   await sleep(POLL_MS);
+   const t=await api('/task/'+task.task_id,{},key);
+   if(t.status==='success'){
+    const o=t.output||{},url=o.pbr_model||o.model||o.base_model;
+    if(!url)throw new Error('The task finished but returned no model file.');
+    $('modelViewer').src=url;$('downloadBtn').href=url;$('viewerContainer').classList.remove('hidden');
+    $('viewerContainer').scrollIntoView({behavior:'smooth',block:'center'});break;
+   }
+   if(['failed','cancelled','banned','expired'].includes(t.status))throw new Error('Generation failed. Try a clearer image of a single object.');
+   if(t.progress!=null)$('loadingText').textContent='AI is crafting your 3D model... '+t.progress+'%';
+  }
+ }catch(e){
+  showError(e instanceof TypeError?'Could not reach the Tripo API. Check your connection. If this keeps happening, the browser may be blocking the request (CORS); see the note about using a small proxy server.':e.message);
+ }finally{
+  $('loadingState').classList.add('hidden');$('genBtn').disabled=false;
+ }
+}
+
+function sendContact(e){
+ e.preventDefault();
+ const s=encodeURIComponent('3DGen AI message from '+$('cName').value);
+ const b=encodeURIComponent($('cMsg').value+'\n\nFrom: '+$('cName').value+' ('+$('cEmail').value+')');
+ location.href='mailto:'+CONTACT_EMAIL+'?subject='+s+'&body='+b;
+}
+</script>
+</body>
+</html>
