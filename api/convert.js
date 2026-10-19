@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -17,7 +17,8 @@ export default async function handler(req, res) {
     const blob = new Blob([buffer], { type: 'image/png' });
     formData.append('file', blob, 'image.png');
 
-    const uploadRes = await fetch('https://openapi.tripo3d.ai/v2/openapi/upload', {
+    // Updated to v3 endpoint
+    const uploadRes = await fetch('https://openapi.tripo3d.ai/v3/openapi/upload', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}` },
       body: formData
@@ -28,7 +29,8 @@ export default async function handler(req, res) {
 
     const imageToken = uploadData.data.image_token;
 
-    const taskRes = await fetch('https://openapi.tripo3d.ai/v2/openapi/task', {
+    // Updated to v3 task endpoint
+    const taskRes = await fetch('https://openapi.tripo3d.ai/v3/openapi/task', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +53,7 @@ export default async function handler(req, res) {
       await new Promise(r => setTimeout(r, 2000));
       attempts++;
 
-      const pollRes = await fetch(`https://openapi.tripo3d.ai/v2/openapi/task/${taskId}`, {
+      const pollRes = await fetch(`https://openapi.tripo3d.ai/v3/openapi/task/${taskId}`, {
         headers: { 'Authorization': `Bearer ${apiKey}` }
       });
       const pollData = await pollRes.json();
